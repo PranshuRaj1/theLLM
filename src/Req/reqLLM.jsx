@@ -6,7 +6,7 @@ const groq = new Groq({
 });
 
 const pretext = `The answer to this query should be first explained in 5 points which are easly readable and then a paragraph should explain the query in breif in 200 words.
-  Use Brief Description: to start the description about the topic `;
+  Always Use **Brief Description:** to start the description about the topic `;
 
 export async function getGroqChatCompletion(message) {
   return groq.chat.completions.create({
