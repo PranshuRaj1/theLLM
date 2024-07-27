@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { getGroqChatCompletion } from "./Req/reqLLM";
 import { ProgressSpinner } from "primereact/progressspinner";
+import makeTextReadable from "./Req/makeTextReadable";
 
 const App = () => {
   const [userInput, setUserInput] = useState("");
-  const [response, setResponse] = useState("");
+  const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
@@ -13,29 +14,33 @@ const App = () => {
   };
 
   const handleButtonClick = async () => {
-    setLoading(true); // Start loading
-    const chatCompletion = await getGroqChatCompletion(userInput);
-    const res = chatCompletion.choices[0]?.message?.content || "";
-    setResponse(res);
-    setLoading(false); // Stop loading
+    setLoading(true);
+    try {
+      const chatCompletion = await getGroqChatCompletion(userInput);
+      const res = chatCompletion.choices[0]?.message?.content || "";
+      setResponse(makeTextReadable(res));
+    } catch (error) {
+      console.error("Error fetching chat completion:", error);
+      setResponse(<p>Error fetching response</p>);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="h-screen bg-gray-950 flex flex-col justify-between p-4">
       <div>
         <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white text-center">
-          The LLM
+          <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
+            QuickGrab
+          </span>
         </h1>
         {loading ? (
           <div className="flex justify-center mt-4">
             <ProgressSpinner />
           </div>
         ) : (
-          response && (
-            <div className="mt-4 text-white">
-              <p>{response}</p>
-            </div>
-          )
+          response && <div className="mt-4 text-white">{response}</div>
         )}
       </div>
 
@@ -47,7 +52,7 @@ const App = () => {
             value={userInput}
             onChange={handleInputChange}
             placeholder="Enter your query"
-            style={{ paddingRight: "6rem" }} // Add padding to make space for the button
+            style={{ paddingRight: "6rem" }}
           />
           <button
             onClick={handleButtonClick}
