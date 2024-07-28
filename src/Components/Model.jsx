@@ -43,7 +43,7 @@ const Model = () => {
               <h3 className="text-white text-xl mb-2">Hi, {user.name}</h3>
               <button
                 onClick={() =>
-                  logout({ returnTo: "https://thellm.netlify.app" })
+                  logout({ returnTo: "https://the-llm.vercel.app" })
                 }
                 className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:bg-red-700"
               >
