@@ -3,11 +3,13 @@ import { InputText } from "primereact/inputtext";
 import { getGroqChatCompletion } from "../Req/reqLLM";
 import { ProgressSpinner } from "primereact/progressspinner";
 import makeTextReadable from "../Req/makeTextReadable";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const Model = () => {
   const [userInput, setUserInput] = useState("");
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
   const handleInputChange = (e) => {
     setUserInput(e.target.value);
@@ -29,20 +31,43 @@ const Model = () => {
 
   return (
     <div className="h-screen bg-gray-950 flex flex-col justify-between p-4">
-      <div>
-        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white text-center">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white text-center">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 text-center">
             QuickGrab
           </span>
         </h1>
-        {loading ? (
-          <div className="flex justify-center mt-4">
-            <ProgressSpinner />
-          </div>
-        ) : (
-          response && <div className="mt-4 text-white">{response}</div>
-        )}
+        <div className="text-right">
+          {isAuthenticated ? (
+            <div>
+              <h3 className="text-white text-xl mb-2">Hi, {user.name}</h3>
+              <button
+                onClick={() =>
+                  logout({ returnTo: "https://thellm.netlify.app" })
+                }
+                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:bg-red-700"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => loginWithRedirect()}
+              className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:bg-green-700"
+            >
+              Sign Up / Login
+            </button>
+          )}
+        </div>
       </div>
+
+      {loading ? (
+        <div className="flex justify-center mt-4">
+          <ProgressSpinner />
+        </div>
+      ) : (
+        response && <div className="mt-4 text-white">{response}</div>
+      )}
 
       <div className="mb-4 flex items-center justify-center">
         <div className="relative w-full max-w-lg">
