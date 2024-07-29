@@ -32,20 +32,18 @@ const Model = () => {
   return (
     <div className="h-screen bg-gray-950 flex flex-col justify-between p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white text-center">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400 text-center">
+        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white text-center">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
             QuickGrab
           </span>
         </h1>
-        <div className="text-right">
+        <div className="text-right mb-4">
           {isAuthenticated ? (
             <div>
               <h3 className="text-white text-xl mb-2">Hi, {user.name}</h3>
               <button
-                onClick={() =>
-                  logout({ returnTo: "https://the-llm.vercel.app" })
-                }
-                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:bg-red-700"
+                onClick={() => logout({ returnTo: window.location.origin })}
+                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:bg-red-700 mt-2"
               >
                 Logout
               </button>
@@ -53,21 +51,20 @@ const Model = () => {
           ) : (
             <button
               onClick={() => loginWithRedirect()}
-              className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:bg-green-700"
+              className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:bg-green-700 mt-2"
             >
               Sign Up / Login
             </button>
           )}
         </div>
+        {loading ? (
+          <div className="flex justify-center mt-4">
+            <ProgressSpinner />
+          </div>
+        ) : (
+          response && <div className="mt-4 text-white">{response}</div>
+        )}
       </div>
-
-      {loading ? (
-        <div className="flex justify-center mt-4">
-          <ProgressSpinner />
-        </div>
-      ) : (
-        response && <div className="mt-4 text-white">{response}</div>
-      )}
 
       <div className="mb-4 flex items-center justify-center">
         <div className="relative w-full max-w-lg">
