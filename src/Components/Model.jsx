@@ -30,10 +30,10 @@ const Model = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-950 flex flex-col justify-between p-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="h-screen bg-gray-950 flex  justify-between p-4">
+      <div className="flex justify-center mb-4">
         <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white text-center">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
+          <span className="text-center text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
             QuickGrab
           </span>
         </h1>

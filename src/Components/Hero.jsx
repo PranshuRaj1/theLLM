@@ -4,12 +4,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 // Hero Component
 const Hero = () => {
-  const navigate = useNavigate();
-  const { user, loginWithRedirect } = useAuth0();
+  const { loginWithRedirect } = useAuth0();
 
-  const handleClick = () => {
-    navigate("/model"); // Replace "/target-route" with the route you want to navigate to
-  };
   return (
     <>
       <div className="bg-neutral-900">
