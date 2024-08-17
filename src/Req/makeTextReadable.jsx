@@ -3,7 +3,7 @@ import React from "react";
 function makeTextReadable(text) {
   // Split the text into parts based on key points, paragraph headings, and brief descriptions
   const parts = text.split(
-    /(\d\.\s.*?:|\n\nParagraph:|\*\*Brief Description:\*\*)/g
+    /(\d\.\s.*?:|\n\nParagraph:|\*\*Brief Description\*\*|Description|Paragraph|Religion|Area|Population|Capital|Continent|Common Name|Description|Medical Uses)/g
   );
 
   return (

@@ -1,91 +1,37 @@
-import React, { useState } from "react";
-import { InputText } from "primereact/inputtext";
-import { getGroqChatCompletion } from "../Req/reqLLM";
-import { ProgressSpinner } from "primereact/progressspinner";
-import makeTextReadable from "../Req/makeTextReadable";
-import { useAuth0 } from "@auth0/auth0-react";
+import Groq from "groq-sdk";
 
-const Model = () => {
-  const [userInput, setUserInput] = useState("");
-  const [response, setResponse] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
+const groq = new Groq({
+  apiKey: import.meta.env.VITE_GROQ_API_KEY,
+  dangerouslyAllowBrowser: true,
+});
 
-  const handleInputChange = (e) => {
-    setUserInput(e.target.value);
-  };
+const pretext = `do not use colon(:)in your response
+Here is an example of the output format for a topic let it be India,
+Continent Asia
+Capital New Delhi
+Population  1.393 billion
+Area 3,287,263 km²
+Religion Hinduism, Islam, Christianity, Sikhism, Buddhism, Jainism, Judaism, Zoroastrianism
+Common Name Bharat
+Description  India, officially the Republic of India (Hindi: Bhārat Gaṇarājya), is a country in South Asia. It is the seventh-largest country by area,
+the second-most populous country, and the most populous democracy in the world. Bounded by the Indian Ocean on the south, 
+the Arabian Sea on the southwest, and the Bay of Bengal on the southeast, it shares land borders with Pakistan to the west; China, Nepal, 
+and Bhutan to the north; and Bangladesh and Myanmar to the east. In the Indian Ocean, India is in the vicinity of Sri Lanka and the Maldives; 
+its Andaman and Nicobar Islands share a maritime border with Thailand, Myanmar, and Indonesia.
 
-  const handleButtonClick = async () => {
-    setLoading(true);
-    try {
-      const chatCompletion = await getGroqChatCompletion(userInput);
-      const res = chatCompletion.choices[0]?.message?.content || "";
-      setResponse(makeTextReadable(res));
-    } catch (error) {
-      console.error("Error fetching chat completion:", error);
-      setResponse(<p>Error fetching response</p>);
-    } finally {
-      setLoading(false);
-    }
-  };
+Note above example and answer is in the same format as above.
+Now, below is a prompt, provide response in the same format as above for the same prompt provided.
+The prompt is 
+`;
 
-  return (
-    <div className="h-screen bg-gray-950 flex flex-col justify-between p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white text-center">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
-            QuickGrab
-          </span>
-        </h1>
-        <div className="text-right mb-4">
-          {isAuthenticated ? (
-            <div>
-              <h3 className="text-white text-xl mb-2">Hi, {user.name}</h3>
-              <button
-                onClick={() => logout({ returnTo: window.location.origin })}
-                className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:bg-red-700 mt-2"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => loginWithRedirect()}
-              className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:bg-green-700 mt-2"
-            >
-              Sign Up / Login
-            </button>
-          )}
-        </div>
-        {loading ? (
-          <div className="flex justify-center mt-4">
-            <ProgressSpinner />
-          </div>
-        ) : (
-          response && <div className="mt-4 text-white">{response}</div>
-        )}
-      </div>
-
-      <div className="mb-4 flex items-center justify-center">
-        <div className="relative w-full max-w-lg">
-          <InputText
-            className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            id="inputtext"
-            value={userInput}
-            onChange={handleInputChange}
-            placeholder="Enter your query"
-            style={{ paddingRight: "6rem" }}
-          />
-          <button
-            onClick={handleButtonClick}
-            className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:bg-blue-700"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Model;
+export async function getGroqChatCompletion(message) {
+  return groq.chat.completions.create({
+    messages: [
+      {
+        role: "user",
+        content: pretext + message,
+      },
+    ],
+    model: "llama3-70b-8192",
+  });
+}
