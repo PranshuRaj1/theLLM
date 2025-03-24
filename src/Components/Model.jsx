@@ -5,7 +5,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import makeTextReadable from "../Req/makeTextReadable";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 const Model = () => {
   const [userInput, setUserInput] = useState("");
