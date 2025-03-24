@@ -1,69 +1,119 @@
 import React from "react";
 
 function makeTextReadable(text) {
-  // Split the text into parts based on key points, paragraph headings, and brief descriptions
-  const parts = text.split(
-    /(\d\.\s.*?:|\n\nParagraph:|\*\*Brief Description\*\*|Description|Paragraph|Religion|Area|Population|Capital|Continent|Common Name|Description|Medical Uses)/g
-  );
+  // Function to handle asterisk-enclosed headers
+  const processAsteriskHeaders = (line) => {
+    // Match content between double asterisks: **text**
+    const headerMatch = line.match(/\*\*(.*?)\*\*/);
 
-  return (
-    <div>
-      {parts.map((part, index) => {
-        if (index % 2 === 1) {
-          // This part contains key point heading, paragraph heading, or brief description
+    if (headerMatch) {
+      // Extract the header text between asterisks
+      const headerText = headerMatch[1];
+      // Replace the original **text** with properly formatted JSX
+      return line.replace(
+        /\*\*(.*?)\*\*/,
+        `<span class="text-yellow-400 font-bold">${headerText}</span>`
+      );
+    }
+    return line;
+  };
 
-          if (part.includes("Brief Description:")) {
-            return (
-              <div key={index} className="my-2">
-                <span className="font-bold text-green-500">
-                  Brief Description:
-                </span>
-                <div className="ml-4">
-                  <p>{parts[index + 1] ? parts[index + 1].trim() : null}</p>
-                </div>
-              </div>
-            );
-          }
+  try {
+    // Process the text line by line
+    const lines = text.split("\n");
+    const processedLines = [];
 
-          if (part.startsWith("•")) {
-            // Handle bullet points
-            return (
-              <div key={index} className="my-2">
-                <div>
-                  <span className="font-bold text-yellow-500">
-                    {part.trim()}
-                  </span>
-                  <div className="ml-4">
-                    {parts[index + 1] ? <p>{parts[index + 1].trim()}</p> : null}
-                  </div>
-                </div>
-              </div>
-            );
-          }
+    lines.forEach((line) => {
+      let processedLine = line;
 
-          return (
-            <div key={index} className="my-2">
-              {part.includes("Paragraph:") ? (
-                <span className="font-bold text-blue-500">
-                  {part.replace("Paragraph:", "").trim()}
-                </span>
-              ) : (
-                <div>
-                  <span className="font-bold text-yellow-500">
-                    • {part.replace(/\*\*/g, "").trim()}
-                  </span>
-                  <div className="ml-4">
-                    {parts[index + 1] ? <p>{parts[index + 1].trim()}</p> : null}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        }
-        return null; // Skip the non-key point parts
-      })}
-    </div>
-  );
+      // If line contains double asterisks (section headers)
+      if (line.includes("**")) {
+        processedLine = processAsteriskHeaders(line);
+      }
+
+      // Process single asterisk bullet points
+      if (line.trim().startsWith("* ")) {
+        const content = line.substring(2).trim();
+        processedLine = `<li><span class="text-yellow-400 mr-2">*</span>${content}</li>`;
+      }
+
+      processedLines.push(processedLine);
+    });
+
+    // Convert the processed array to HTML-like structure
+    const htmlContent = processedLines.join("\n");
+
+    // Render the content using dangerouslySetInnerHTML (in real app, consider a safer approach)
+    return (
+      <div className="text-white">
+        <div
+          dangerouslySetInnerHTML={{
+            __html: htmlContent
+              .replace(/<li>/g, '<div class="flex items-start mb-2">')
+              .replace(/<\/li>/g, "</div>"),
+          }}
+          className="space-y-3"
+        />
+      </div>
+    );
+  } catch (error) {
+    // Fallback for any parsing errors
+    console.error("Error parsing text:", error);
+    return <div className="text-white whitespace-pre-line">{text}</div>;
+  }
 }
 
-export default makeTextReadable;
+// Safer approach without dangerouslySetInnerHTML
+function makeTextReadableImproved(text) {
+  try {
+    const lines = text.split("\n");
+    return (
+      <div className="text-white max-w-3xl mx-auto space-y-3">
+        {lines.map((line, index) => {
+          // Handle section headers with double asterisks
+          if (line.includes("**")) {
+            const parts = line.split("**");
+            return (
+              <div key={index} className="my-3">
+                {parts.map((part, partIndex) => {
+                  // Every odd-indexed part is inside asterisks
+                  if (partIndex % 2 === 1) {
+                    return (
+                      <span
+                        key={`header-${partIndex}`}
+                        className="text-yellow-400 font-bold"
+                      >
+                        {part}
+                      </span>
+                    );
+                  }
+                  return <span key={`text-${partIndex}`}>{part}</span>;
+                })}
+              </div>
+            );
+          }
+
+          // Handle bullet points with single asterisk
+          if (line.trim().startsWith("* ")) {
+            const content = line.substring(2).trim();
+            return (
+              <div key={index} className="flex items-start">
+                <span className="text-yellow-400 mr-2 font-bold">*</span>
+                <span>{content}</span>
+              </div>
+            );
+          }
+
+          // Regular line
+          return <div key={index}>{line}</div>;
+        })}
+      </div>
+    );
+  } catch (error) {
+    console.error("Error processing text:", error);
+    return <div className="text-white whitespace-pre-line">{text}</div>;
+  }
+}
+
+// Export the safer version
+export default makeTextReadableImproved;
