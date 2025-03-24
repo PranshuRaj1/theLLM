@@ -5,6 +5,8 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import makeTextReadable from "../Req/makeTextReadable";
 import { useAuth0 } from "@auth0/auth0-react";
 
+const baseUrl = process.env.API_BASE_URL;
+
 const Model = () => {
   const [userInput, setUserInput] = useState("");
   const [response, setResponse] = useState(null);
@@ -21,16 +23,59 @@ const Model = () => {
 
     setLoading(true);
     try {
-      const chatCompletion = await getGroqChatCompletion(userInput);
-      const res = chatCompletion.choices[0]?.message?.content || "";
-      console.log(res);
-
+      const res = await getGroqChatCompletion(userInput);
       setResponse(makeTextReadable(res));
+
+      // Save chat to backend
+      if (isAuthenticated) {
+        await saveChatToBackend(userInput, res);
+      }
     } catch (error) {
       console.error("Error fetching chat completion:", error);
       setResponse(<p>Error fetching response</p>);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveChatToBackend = async (userMessage, aiResponse) => {
+    try {
+      const response = await fetch(`${baseUrl}/api/coconversations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getAccessTokenSilently()}`,
+        },
+        body: JSON.stringify({ title: userMessage.substring(0, 50) }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create conversation");
+      }
+
+      const { conversationId } = await response.json();
+
+      // Save user message
+      await fetch(`${baseUrl}/api/conversations/${conversationId}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getAccessTokenSilently()}`,
+        },
+        body: JSON.stringify({ role: "user", content: userMessage }),
+      });
+
+      // Save AI response
+      await fetch(`${baseUrl}/api/conversations/${conversationId}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getAccessTokenSilently()}`,
+        },
+        body: JSON.stringify({ role: "assistant", content: aiResponse }),
+      });
+    } catch (error) {
+      console.error("Error saving chat:", error);
     }
   };
 
