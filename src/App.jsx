@@ -1,6 +1,6 @@
 import Home from "./Components/Home";
 import Model from "./Components/Model";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Test from "./Components/Test";
 const App = () => {
   return (

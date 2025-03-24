@@ -30,6 +30,7 @@ const Hero = () => {
               our easy search map – your pathway to smarter, faster learning!
             </p>
           </div>
+          <br />
           <button
             type="button"
             onClick={(e) => loginWithRedirect()}
