@@ -1,4 +1,4 @@
-const baseUrl = process.env.API_BASE_URL;
+const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export async function getGroqChatCompletion(message) {
   const response = await fetch(`${baseUrl}/api/groq-completion`, {
