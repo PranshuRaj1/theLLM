@@ -2,6 +2,8 @@ import Home from "./Components/Home";
 import Model from "./Components/Model";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Test from "./Components/Test";
+import dotenv from "dotenv";
+dotenv.config();
 const App = () => {
   return (
     <>
